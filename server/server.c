@@ -24,21 +24,24 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
+#include "dictprot.h"
 
-void handler_client(pid_t clientfd)
+void handler_client(pid_t clientfd, sqlite3 *db)
 {
     int len;
     char packet[1024];
     while (1){
         //recv
+        packet_recv_proc(clientfd, db);
 #ifdef __DEBUG__
-        len = recv(clientfd, packet, sizeof(packet), 0);
+        /*len = recv(clientfd, packet, sizeof(packet), 0);*/
 
-        packet[len] = '\0';
+        /*packet[len] = '\0';*/
         printf("packet : %s\n", packet);
         //send
-        send(clientfd, packet, len, 0);
-        printf("send over\n");
+        /*send(clientfd, packet, len, 0);*/
+        /*printf("send over\n");*/
 #endif
     }
 }
@@ -53,10 +56,16 @@ int main(int argc, const char *argv[])
     int sockfd;
     pid_t pid;
     int clientfd;
+    sqlite3 *db;
 
     struct sockaddr_in server_addr;
     struct sockaddr_in peer_addr;
     socklen_t addrlen = sizeof(peer_addr);
+    //设置信号处理方式：显示忽略，自动回收资源
+    if (signal(SIGCHLD, SIG_IGN) == SIG_ERR){
+        perror("Fail to signal");
+        exit(EXIT_FAILURE);
+    }
 
     //创建socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -80,6 +89,8 @@ int main(int argc, const char *argv[])
     //监听套接字
     ret = listen(sockfd, 10);
 
+    //打开数据库
+    open_db("dict.db", &db);
     //accept 处理
     while (1){
         clientfd = accept(sockfd, (struct sockaddr *)&peer_addr, &addrlen);
@@ -104,7 +115,7 @@ int main(int argc, const char *argv[])
 #ifdef __DEBUG__
             printf("This is a child process\n");
 #endif
-            handler_client(clientfd);
+            handler_client(clientfd, db);
         }
 
     }

@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include "dictprot.h"
 
 int main(int argc, const char *argv[])
 {
@@ -42,6 +43,8 @@ int main(int argc, const char *argv[])
         exit(EXIT_FAILURE);
     }
 
+        client_exec_reg(sockfd, "hello", "3242342");
+#ifdef __DEBUG2__
     while (1){
         //fgets
         putchar('>');
@@ -54,13 +57,11 @@ int main(int argc, const char *argv[])
         }
         //recv
         len = recv(sockfd, packet, sizeof(packet), 0);
-#ifdef __DEBUG__
         packet[len] = '\0';
         printf("recv packet from server: %s\n", packet);
-#endif
     
     }
-
+#endif
     close(sockfd);
     return 0;
 }
