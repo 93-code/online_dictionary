@@ -1,7 +1,14 @@
 /* 13:09 2015-04-30 Thursday */
 #ifndef __DICTPROT_H__
 #define __DICTPROT_H__
-#include "sqlite3.h"
+
+#include "dictprot.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include "sqlite.h"
 
 #define LEN_FUNC        2
 #define LEN_PACKET      4
@@ -41,7 +48,7 @@ int packet_recv_head(int sockfd, int *func);
 int packet_recv_proc(int sockfd, sqlite3 *db);
 
 int client_exec_reg(int sockfd, const char *name, const char *passwd);
-int server_exec_reg(int sockfd, sqlite3 *db);
+int server_exec_reg(int sockfd, sqlite3 *db, int len);
 
 
 

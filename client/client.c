@@ -44,6 +44,9 @@ int main(int argc, const char *argv[])
     }
 
         client_exec_reg(sockfd, "hello", "3242342");
+        len = recv(sockfd, packet, sizeof(packet), 0);
+        packet[len] = '\0';
+        printf("recv packet from server: %s\n", packet);
 #ifdef __DEBUG2__
     while (1){
         //fgets

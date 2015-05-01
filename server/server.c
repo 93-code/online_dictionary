@@ -26,24 +26,28 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include "dictprot.h"
+#include "sqlite.h"
 
 void handler_client(pid_t clientfd, sqlite3 *db)
 {
     int len;
+    int ret = 0;
     char packet[1024];
-    while (1){
         //recv
-        packet_recv_proc(clientfd, db);
-#ifdef __DEBUG__
-        /*len = recv(clientfd, packet, sizeof(packet), 0);*/
-
-        /*packet[len] = '\0';*/
+        printf("In %s : %s\n", __FILE__, __FUNCTION__);
+        ret = packet_recv_proc(clientfd, db);
+        if (-1 == ret){
+            perror("Fail to packet_recv_proc");
+        }
+        printf("In %s : %s\n", __FILE__, __FUNCTION__);
+#ifdef __DEBUG2__
+        len = recv(clientfd, packet, sizeof(packet), 0);
+        printf("In %s:%s\n", __FILE__, __FUNCTION__);
+        packet[len] = '\0';
         printf("packet : %s\n", packet);
-        //send
-        /*send(clientfd, packet, len, 0);*/
-        /*printf("send over\n");*/
+        send(clientfd, packet, len, 0);
+        printf("send over\n");
 #endif
-    }
 }
 
 int main(int argc, const char *argv[])

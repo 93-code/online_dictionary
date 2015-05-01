@@ -1,10 +1,5 @@
 #include "dictprot.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "sqlite3.h"
+#include "sqlite.h"
 
 //set/get包体长度
 void packet_set_len(char *packet, int len)
@@ -30,6 +25,7 @@ void packet_set_func(char *packet, int func)
     sprintf(buf, "%02d", func);
     memcpy(packet, buf, LEN_FUNC);
 }
+
 int packet_get_func(const char *packet)
 {
     int func;
@@ -58,6 +54,7 @@ int recv_fix_len(int sockfd, char *buf, int len)
 exit:
     return ret;
 }
+
 int send_fix_len(int sockfd, const char *buf, int len)
 {
     int ret = 0;
@@ -86,12 +83,17 @@ int packet_recv_head(int sockfd, int *func)
     if (-1 == ret){
         goto exit;
     }
+    ret = packet_get_len(buf);
     *func = packet_get_func(buf);
     if (*func < FUNC_REG || *func > FUNC_END){
         ret = -1;
         goto exit;
     }
 exit:
+#ifdef __DEBUG__
+    printf("In %s:%s\n", __FILE__, __FUNCTION__);
+    printf("ret = %d\n", ret);
+#endif
     return ret;
 }
 //协议解析框架
@@ -101,18 +103,22 @@ int packet_recv_proc(int sockfd, sqlite3 *db)
     int func;
     char packet[1024];
 
-    //取得功能号
+    //取得功能号和包长
     ret = packet_recv_head(sockfd, &func);
     if (-1 == ret){
+        perror("Fail to packet_recv_head");
         goto exit;
     }
 #ifdef __DEBUG__
-    printf("rece: %d :: %d\n", ret, func);
+    printf("rece head: %d :: %d\n", ret, func);
 #endif
 
     switch (func){
     case FUNC_REG:
-        ret = server_exec_reg(sockfd, db);
+#ifdef __DEBUG__
+    printf("FUNC_REG : %d\n", func);
+#endif
+        ret = server_exec_reg(sockfd, db, ret);
         if (-1 == ret){
             perror("Fail to server_exec_reg");
             goto exit;
@@ -136,50 +142,55 @@ exit:
 
 int client_exec_reg(int sockfd, const char *name, const char *passwd)
 {
+    int len = LEN_HEAD;
     char buf[LEN_USER_MSG + 1];
     char packet[1024];
     //打包用户名与密码
     packet_set_len(packet, LEN_USER_MSG);
-    printf("send packet:%s\n", packet);
     packet_set_func(packet, FUNC_REG);
-    printf("send packet:%s\n", packet);
-    strcpy(buf, name);
-    printf("send packet:%s\n", packet);
-    strcpy(buf + LEN_USER_NAME - 1, passwd);
-    printf("send packet:%s\n", packet);
-    memcpy(packet, buf, LEN_USER_MSG);
-#if 0
-    sprintf(buf, "%s", name);
-    printf("buf = %s\n", buf);
-    sprintf(buf+LEN_USER_NAME, "%s", passwd);
-    buf[LEN_USER_MSG] = '\0';
-    memcpy(packet, buf, LEN_USER_MSG);
+
+    strcpy(packet + len, name);
+    len += LEN_USER_NAME;
+    strcpy(packet + len, passwd);
+    len += LEN_USER_PASS;
+
+    //客户端发送
+    send_fix_len(sockfd, packet, len);
+#ifdef __DEBUG__
+    printf("In %s:%s\n", __FILE__, __FUNCTION__);
+    printf("packet:%s\n", packet);
 #endif
-    /*memcpy(packet + LEN_HEAD, name, LEN_USER_NAME);*/
-    /*memcpy(packet + LEN_HEAD + LEN_USER_NAME, passwd, LEN_USER_PASS);*/
-    printf("send packet:%s\n", packet);
-    //客户端发送包头
-    send_fix_len(sockfd, packet, LEN_HEAD + LEN_USER_MSG);
-    printf("send packet:%s\n", packet);
 
     return 0;
 }
-int server_exec_reg(int sockfd, sqlite3 *db)
+int server_exec_reg(int sockfd, sqlite3 *db, int len)
 {
     char name[LEN_USER_NAME+1];
     char passwd[LEN_USER_PASS+1];
     char packet[LEN_USER_MSG + 1];
     
-    recv_fix_len(sockfd, packet, LEN_USER_MSG);
-    packet[LEN_USER_MSG] = '\0';
+    recv_fix_len(sockfd, packet, len);
 
-    memcpy(name, packet, LEN_USER_NAME);
+#ifdef __DEBUG__
+    printf("In %s:%s\n", __FILE__, __FUNCTION__);
+    printf("packet:%s\n", packet);
+#endif
+
+    memcpy(name, packet + LEN_HEAD, LEN_USER_NAME);
     name[LEN_USER_NAME] = '\0';
+#ifdef __DEBUG__
+    printf("In %s:%s\n", __FILE__, __FUNCTION__);
+    printf("name:%s\n", name);
+#endif
 
-    memcpy(passwd, packet + LEN_USER_NAME, LEN_USER_PASS);
+    memcpy(passwd, packet + LEN_HEAD + LEN_USER_NAME, LEN_USER_PASS);
     passwd[LEN_USER_PASS] = '\0';
+#ifdef __DEBUG__
+    printf("In %s:%s\n", __FILE__, __FUNCTION__);
+    printf("passwd:e%s\n", passwd);
+#endif
 
-    /*insert_user_db(db, name, passwd);*/
+    insert_user_db(db, name, passwd);
 
     return 0;
 }
