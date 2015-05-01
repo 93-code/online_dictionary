@@ -18,12 +18,12 @@ int packet_get_len(const char *packet)
     return atoi(buf);
 }
 
-//set/get功能号
+//set/get功能号:注意加上LEN_PACKET
 void packet_set_func(char *packet, int func)
 {
     char buf[LEN_FUNC + 1];
     sprintf(buf, "%02d", func);
-    memcpy(packet, buf, LEN_FUNC);
+    memcpy(packet + LEN_PACKET, buf, LEN_FUNC);
 }
 
 int packet_get_func(const char *packet)
@@ -142,6 +142,7 @@ exit:
 
 int client_exec_reg(int sockfd, const char *name, const char *passwd)
 {
+    int ret = 0;
     int len = LEN_HEAD;
     char buf[LEN_USER_MSG + 1];
     char packet[1024];
@@ -155,13 +156,16 @@ int client_exec_reg(int sockfd, const char *name, const char *passwd)
     len += LEN_USER_PASS;
 
     //客户端发送
-    send_fix_len(sockfd, packet, len);
+    ret = send_fix_len(sockfd, packet, len);
+    if (-1 == ret){
+        goto exit;
+    }
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
     printf("packet:%s\n", packet);
 #endif
-
-    return 0;
+exit:
+    return ret;
 }
 int server_exec_reg(int sockfd, sqlite3 *db, int len)
 {
@@ -176,18 +180,18 @@ int server_exec_reg(int sockfd, sqlite3 *db, int len)
     printf("packet:%s\n", packet);
 #endif
 
-    memcpy(name, packet + LEN_HEAD, LEN_USER_NAME);
+    memcpy(name, packet, LEN_USER_NAME);
     name[LEN_USER_NAME] = '\0';
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
     printf("name:%s\n", name);
 #endif
 
-    memcpy(passwd, packet + LEN_HEAD + LEN_USER_NAME, LEN_USER_PASS);
+    memcpy(passwd, packet + LEN_USER_NAME, LEN_USER_PASS);
     passwd[LEN_USER_PASS] = '\0';
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
-    printf("passwd:e%s\n", passwd);
+    printf("passwd:%s\n", passwd);
 #endif
 
     insert_user_db(db, name, passwd);

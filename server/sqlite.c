@@ -18,6 +18,28 @@ int open_db(const char *pathname, sqlite3 **db)
     return 0;
 }
 
+int sum_db(sqlite3 *db)
+{
+    int sum = 0;
+    int ret = 0;
+    char sql[1024];
+    char *errmsg;
+    char **resultp;
+
+    sprintf(sql, "select * from users where %s!=-1;", "id");
+    ret = sqlite3_get_table(db, sql, &resultp, &sum, NULL, &errmsg);
+    if (ret != SQLITE_OK){
+        fprintf(stderr, "Fail : %s\n", errmsg);
+        goto exit;
+    }
+#ifdef __DEBUG__
+    printf("sum : %d\n", sum);
+#endif
+    ret = sum;
+exit:
+    return ret;
+}
+
 int search_user_db(sqlite3 *db, const char *name)
 {
     int ret = 0;
@@ -26,11 +48,11 @@ int search_user_db(sqlite3 *db, const char *name)
     int ncolumn;
     char *errmsg;
     char sql[1024];
-    sprintf(sql, "select * from users where name='%s';", name);
 #ifdef __DEBUG__
+    sprintf(sql, "select * from users where name='%s';", name);
     puts(sql);
+    sum_db(db);
 #endif 
-    /*ret = sqlite3_exec(db, sql, NULL, NULL, NULL);*/
     ret = sqlite3_get_table(db, sql, &resultp, &nrow, &ncolumn, &errmsg);
     if (ret != SQLITE_OK){
         ret = -1;
@@ -46,6 +68,7 @@ exit:
 int insert_user_db(sqlite3 *db, const char *name, const char *passwd)
 {
     int ret = 0;
+    int sum = 0;
     char sql[1024];
 
     char *errmsg;
@@ -54,8 +77,10 @@ int insert_user_db(sqlite3 *db, const char *name, const char *passwd)
         printf("用户已注册\n");
         goto exit;
     }
+    //获得用户个数
+    sum = sum_db(db);
     //插入用户信息
-    sprintf(sql, "insert into users values(%d,'%s','%s');", ++ret, name, passwd);
+    sprintf(sql, "insert into users values(%d,'%s','%s');", ++sum, name, passwd);
     ret = sqlite3_exec(db, sql, NULL, NULL, &errmsg);
     if (ret != SQLITE_OK){
         fprintf(stderr, "Fail to sqlite3_exec : %s\n", errmsg);

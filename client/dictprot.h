@@ -48,7 +48,7 @@ int packet_recv_head(int sockfd, int *func);
 int packet_recv_proc(int sockfd, sqlite3 *db);
 
 int client_exec_reg(int sockfd, const char *name, const char *passwd);
-int server_exec_reg(int sockfd, sqlite3 *db);
+int server_exec_reg(int sockfd, sqlite3 *db, int len);
 
 
 

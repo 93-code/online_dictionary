@@ -7,6 +7,7 @@
 #include "sqlite3.h"
 
 int open_db(const char *pathname, sqlite3 **db);
+int sum_db(sqlite3 *db);
 int search_user_db(sqlite3 *db, const char *name);
 int insert_user_db(sqlite3 *db, const char *name, const char *passwd);
 #endif

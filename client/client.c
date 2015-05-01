@@ -10,6 +10,27 @@
 #include <arpa/inet.h>
 #include "dictprot.h"
 
+int do_register(int sockfd)
+{
+    int ret = 0;
+    char name[LEN_USER_NAME+1];
+    char passwd[LEN_USER_PASS+1];
+    fprintf(stdout, "Input your name and passwd\n");
+    fprintf(stdout, "name: ");
+    fgets(name, LEN_USER_NAME, stdin);
+    name[LEN_USER_NAME] = '\0';
+    fprintf(stdout, "passwd: ");
+    fgets(passwd, LEN_USER_PASS, stdin);
+    passwd[LEN_USER_PASS] = '\0';
+
+    //注册
+    ret = client_exec_reg(sockfd, name, passwd);
+    if (-1 == ret){
+        perror("Fail to send name and passwd");
+    }
+    return ret;
+}
+
 int main(int argc, const char *argv[])
 {
     if (argc < 3){
@@ -19,6 +40,7 @@ int main(int argc, const char *argv[])
 
     int ret;
     int len;
+    int opt;
     int sockfd;
     char packet[1024];
 
@@ -43,28 +65,40 @@ int main(int argc, const char *argv[])
         exit(EXIT_FAILURE);
     }
 
+#ifdef __DEBUG2__/*{{{*/
         client_exec_reg(sockfd, "hello", "3242342");
         len = recv(sockfd, packet, sizeof(packet), 0);
         packet[len] = '\0';
         printf("recv packet from server: %s\n", packet);
-#ifdef __DEBUG2__
+#endif/*}}}*/
+
     while (1){
-        //fgets
-        putchar('>');
-        fgets(packet, sizeof(packet), stdin);
-        packet[strlen(packet)-1] = '\0';
-        //send
-        send(sockfd, packet, strlen(packet), 0);
-        if (strncmp(packet, "quit", 4) == 0){
+        //输出提示界面
+        puts("===========================");
+        puts("== 1: register== 2: login==");
+        puts("===========================");
+        puts("== 3: search ==  4: quit===");
+        puts("===========================");
+        //opt
+        scanf("%d", &opt);
+        getchar();
+        switch (opt){
+        case 1:
+            do_register(sockfd);
             break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            goto exit;
+            break;
+        default:
+            fprintf(stderr, "Input opt\n");
         }
-        //recv
-        len = recv(sockfd, packet, sizeof(packet), 0);
-        packet[len] = '\0';
-        printf("recv packet from server: %s\n", packet);
     
     }
-#endif
+exit:
     close(sockfd);
     return 0;
 }

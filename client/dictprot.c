@@ -18,12 +18,12 @@ int packet_get_len(const char *packet)
     return atoi(buf);
 }
 
-//set/get功能号
+//set/get功能号:注意加上LEN_PACKET
 void packet_set_func(char *packet, int func)
 {
     char buf[LEN_FUNC + 1];
     sprintf(buf, "%02d", func);
-    memcpy(packet, buf, LEN_FUNC);
+    memcpy(packet + LEN_PACKET, buf, LEN_FUNC);
 }
 
 int packet_get_func(const char *packet)
