@@ -42,7 +42,7 @@ exit:
     return ret;
 }
 
-int search_user_db(sqlite3 *db, const char *name)
+int search_user_db(sqlite3 *db, const char *name, const char *passwd)
 {
     int ret = 0;
     char **resultp; 
@@ -51,7 +51,7 @@ int search_user_db(sqlite3 *db, const char *name)
     char *errmsg;
     char sql[1024];
 #ifdef __DEBUG__
-    sprintf(sql, "select * from users where name='%s';", name);
+    sprintf(sql, "select * from users where name='%s' and passwd='%s';", name, passwd);
     puts(sql);
     sum_db(db);
 #endif 
@@ -74,7 +74,7 @@ int insert_user_db(sqlite3 *db, const char *name, const char *passwd)
     char sql[1024];
 
     char *errmsg;
-    ret = search_user_db(db, name);
+    ret = search_user_db(db, name, passwd);
     if (ret >= 1){
         printf("用户已注册\n");
         goto exit;
@@ -92,13 +92,42 @@ exit:
     return ret;
 }
 
+int search_word_db(sqlite3 *db, const char *word, char *explain)
+{
+    int ret = 0;
+    char sql[1024];
+    char **resultp;
+    int nrow;
+    int ncolumn;
+    char *errmsg;
+    sprintf(sql, "select * from words where word='%s';", word);
+    ret = sqlite3_get_table(db, sql, &resultp, &nrow, &ncolumn, &errmsg);
+    if (ret != SQLITE_OK){
+        fprintf(stderr, "Fail to search_word_db:%s\n", errmsg);
+        ret = -1;
+        goto exit;
+    }
+    strcpy(explain, resultp[ncolumn + 2]);
+    explain[strlen(explain)] = '\0';
+#ifdef __DEBUG2__
+    printf("%s : %s\n", __FILE__, __FUNCTION__);
+    printf("explain : %s\n", resultp[ncolumn]);
+#endif
+    
+exit:
+    return ret;
+}
+
 #ifdef __DEBUG2__
 int main(int argc, const char *argv[])
 {
     sqlite3 *db;
+    char explain[1024];
 
     open_db(argv[1], &db);
-    insert_user_db(db, "yang", "12345");
+    /*insert_user_db(db, "yang", "12345");*/
+    search_word_db(db, "man", explain);
+    printf("explain : %s\n", explain);
     return 0;
 }
 #endif

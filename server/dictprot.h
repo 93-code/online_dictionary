@@ -51,7 +51,11 @@ int packet_recv_proc(int sockfd, sqlite3 *db);
 int client_exec_reg(int sockfd, const char *name, const char *passwd);
 int server_exec_reg(int sockfd, sqlite3 *db, int len);
 
+int client_exec_login(int sockfd, const char *name, const char *passwd);
+int server_exec_login(int sockfd, sqlite3 *db, int len);
 
+int client_exec_search(int sockfd, const char *word);
+int server_exec_search(int sockfd, sqlite3 *db, int len);
 int client_exec_quit(int sockfd);
 
 #endif

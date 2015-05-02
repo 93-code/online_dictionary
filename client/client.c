@@ -13,15 +13,15 @@
 int do_register(int sockfd)
 {
     int ret = 0;
-    char name[LEN_USER_NAME+1];
-    char passwd[LEN_USER_PASS+1];
+    char name[LEN_USER_NAME+1] = {'\0'};
+    char passwd[LEN_USER_PASS+1] = {'\0'};
     fprintf(stdout, "Input your name and passwd\n");
     fprintf(stdout, "name: ");
     fgets(name, LEN_USER_NAME, stdin);
-    name[LEN_USER_NAME] = '\0';
+    name[strlen(name)-1] = '\0';
     fprintf(stdout, "passwd: ");
     fgets(passwd, LEN_USER_PASS, stdin);
-    passwd[LEN_USER_PASS] = '\0';
+    passwd[strlen(name)-1] = '\0';
 
     //注册
     ret = client_exec_reg(sockfd, name, passwd);

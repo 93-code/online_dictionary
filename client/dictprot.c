@@ -131,6 +131,7 @@ int packet_recv_proc(int sockfd, sqlite3 *db)
     case FUNC_SEARCH:
         break;
     case FUNC_QUIT:
+        ret = RET_END;
         goto exit;
         break;
     case FUNC_BEAT:
@@ -183,7 +184,7 @@ int server_exec_reg(int sockfd, sqlite3 *db, int len)
 #endif
 
     memcpy(name, packet, LEN_USER_NAME);
-    name[strlen(name)-1] = '\0';
+    name[strlen(name)] = '\0';
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
     printf("name:%s\n", name);
@@ -219,3 +220,105 @@ exit:
     return ret;
 }
 
+int client_exec_login(int sockfd, const char *name, const char *passwd)
+{
+    int ret = 0;
+    char packet[1024];
+
+    packet_set_len(packet, LEN_USER_MSG);
+    packet_set_func(packet, FUNC_LOGIN);
+
+    memcpy(packet + LEN_HEAD, name, LEN_USER_NAME);
+    memcpy(packet + LEN_HEAD + LEN_USER_NAME, passwd, LEN_USER_PASS);
+
+    ret = send_fix_len(sockfd, packet, LEN_HEAD + LEN_USER_MSG);
+    if (-1 == ret){
+        fprintf(stderr, "Fail to send_fix_len\n");
+    }
+    return ret;
+}
+
+int server_exec_login(int sockfd, sqlite3 *db, int len)
+{
+    int ret = 0;
+    char packet[1024];
+    char name[LEN_USER_NAME + 1];
+    char passwd[LEN_USER_PASS + 1];
+
+    //接受登录用户名与密码
+    ret = recv_fix_len(sockfd, packet, len);
+    if (-1 == ret){
+        fprintf(stderr, "Fail to recv_fix_len\n");
+        goto exit;
+    }
+
+    memcpy(name, packet, LEN_USER_NAME);
+    name[strlen(name)];
+    memcpy(passwd, packet + LEN_USER_NAME, LEN_USER_PASS);
+    passwd[strlen(passwd)];
+    //查找数据库
+    ret = search_user_db(db, name, passwd);
+    if (ret == 1){
+        printf("Input the word you want to search:");
+        /************/
+    }
+
+exit:
+    return ret;
+}
+
+
+int client_exec_search(int sockfd, const char *word)
+{
+    int ret = 0;
+    char parckt[1024];
+    int len = strlen(word);
+    packet_set_len(packet, len);
+    packet_set_func(packet, FUNC_SEARCH);
+
+    memcpy(packet + LEN_HEAD, word, len);
+    /*packet[strlen(packet)] = '\0';*/
+    //发送查询请求
+    ret = send_fix_len(sockfd, packet, LEN_HEAD + len);
+    if (-1 == ret){
+        fprintf(stderr, "Fail to search_word_db\n");
+    }
+
+    //接受查询结果
+    ret = recv_fix_len(sockfd, packet, sizeof(packet));
+    if (-1 == ret){
+        fprintf(stderr, "Fail to recv the explain\n");
+        goto exit;
+    }
+    packet[strlen(packet)] = '\0';
+    fprintf("%s : %s\n", word, explain);
+exit:
+    return ret;
+}
+
+int server_exec_search(int sockfd, sqlite3 *db, int len)
+{
+    int ret = 0;
+    char packet[1024];
+    char word[1024];
+    char explain[1024];
+
+    ret = recv_fix_len(sockfd, packet, len);
+    if (-1 == ret){
+        goto exit;
+    }
+    //解包
+    memcpy(word, packet, len);
+    //服务器接受search，查询数据库
+    ret = search_word_db(db, word, explain);
+    if (-1 == ret){
+        fprintf(stderr, "Fail to search\n");
+        goto exit;
+    }
+
+    //发送explain给客户端
+    send_fix_len(sockfd, explain, strlen(explain));
+
+exit:
+    return ret;
+}
