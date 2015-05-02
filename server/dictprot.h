@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <signal.h>
 #include "sqlite.h"
 
 #define LEN_FUNC        2
@@ -51,6 +52,7 @@ int client_exec_reg(int sockfd, const char *name, const char *passwd);
 int server_exec_reg(int sockfd, sqlite3 *db, int len);
 
 
+int client_exec_quit(int sockfd);
 
 #endif
 

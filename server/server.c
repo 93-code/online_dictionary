@@ -33,21 +33,27 @@ void handler_client(pid_t clientfd, sqlite3 *db)
     int len;
     int ret = 0;
     char packet[1024];
-        //recv
+        //recv:调用解析框架
+        while (1){
         printf("In %s : %s\n", __FILE__, __FUNCTION__);
         ret = packet_recv_proc(clientfd, db);
         if (-1 == ret){
             perror("Fail to packet_recv_proc");
         }
-        printf("In %s : %s\n", __FILE__, __FUNCTION__);
-#ifdef __DEBUG2__
+        if (ret == RET_END){
+            break;
+        }
+        }
+        exit(EXIT_SUCCESS);
+        return;
+#ifdef __DEBUG2__/*{{{*/
         len = recv(clientfd, packet, sizeof(packet), 0);
         printf("In %s:%s\n", __FILE__, __FUNCTION__);
         packet[len] = '\0';
         printf("packet : %s\n", packet);
         send(clientfd, packet, len, 0);
         printf("send over\n");
-#endif
+#endif/*}}}*/
 }
 
 int main(int argc, const char *argv[])
@@ -120,6 +126,7 @@ int main(int argc, const char *argv[])
             printf("This is a child process\n");
 #endif
             handler_client(clientfd, db);
+            close(sockfd);
         }
 
     }

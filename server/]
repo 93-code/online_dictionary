@@ -131,6 +131,8 @@ int packet_recv_proc(int sockfd, sqlite3 *db)
     case FUNC_SEARCH:
         break;
     case FUNC_QUIT:
+        /*pid = getpid();*/
+        /*kill(pid, SIGKILL);*/
         ret = RET_END;
         goto exit;
         break;
@@ -220,3 +222,18 @@ exit:
     return ret;
 }
 
+int server_exec_quit(int sockfd, int len)
+{
+    int func;
+    int ret = 0;
+    char packet[1024];
+    ret = recv_fix_len(sockfd, packet, len);
+    if (-1 == ret){
+        goto exit;
+    }
+    packet_get_func(packet, &func);
+    if (func == FUNC_QUIT)
+    
+exit:
+    return ret;
+}

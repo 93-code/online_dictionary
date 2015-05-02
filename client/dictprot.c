@@ -101,6 +101,7 @@ int packet_recv_proc(int sockfd, sqlite3 *db)
 {
     int ret = 0;
     int func;
+    pid_t pid;
     char packet[1024];
 
     //取得功能号和包长
@@ -130,6 +131,7 @@ int packet_recv_proc(int sockfd, sqlite3 *db)
     case FUNC_SEARCH:
         break;
     case FUNC_QUIT:
+        goto exit;
         break;
     case FUNC_BEAT:
         break;
@@ -142,6 +144,7 @@ exit:
 
 int client_exec_reg(int sockfd, const char *name, const char *passwd)
 {
+    int ret = 0;
     int len = LEN_HEAD;
     char buf[LEN_USER_MSG + 1];
     char packet[1024];
@@ -155,13 +158,16 @@ int client_exec_reg(int sockfd, const char *name, const char *passwd)
     len += LEN_USER_PASS;
 
     //客户端发送
-    send_fix_len(sockfd, packet, len);
+    ret = send_fix_len(sockfd, packet, len);
+    if (-1 == ret){
+        goto exit;
+    }
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
     printf("packet:%s\n", packet);
 #endif
-
-    return 0;
+exit:
+    return ret;
 }
 int server_exec_reg(int sockfd, sqlite3 *db, int len)
 {
@@ -176,23 +182,40 @@ int server_exec_reg(int sockfd, sqlite3 *db, int len)
     printf("packet:%s\n", packet);
 #endif
 
-    memcpy(name, packet + LEN_HEAD, LEN_USER_NAME);
-    name[LEN_USER_NAME] = '\0';
+    memcpy(name, packet, LEN_USER_NAME);
+    name[strlen(name)-1] = '\0';
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
     printf("name:%s\n", name);
 #endif
 
-    memcpy(passwd, packet + LEN_HEAD + LEN_USER_NAME, LEN_USER_PASS);
-    passwd[LEN_USER_PASS] = '\0';
+    memcpy(passwd, packet + LEN_USER_NAME, LEN_USER_PASS);
+    passwd[strlen(passwd)] = '\0';
 #ifdef __DEBUG__
     printf("In %s:%s\n", __FILE__, __FUNCTION__);
-    printf("passwd:e%s\n", passwd);
+    printf("passwd:%s\n", passwd);
 #endif
 
     insert_user_db(db, name, passwd);
+#ifdef __DEBUG__
+    printf("insert_user_db over\n");
+#endif
 
     return 0;
 }
 
+int client_exec_quit(int sockfd)
+{
+    int ret = 0;
+    char packet[1024];
+    packet_set_len(packet, 0);
+    packet_set_func(packet, FUNC_QUIT);
+    ret = send_fix_len(sockfd, packet, LEN_HEAD);
+    if (-1 == ret){
+        goto exit;
+    }
+    
+exit:
+    return ret;
+}
 

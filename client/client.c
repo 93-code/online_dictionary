@@ -31,6 +31,10 @@ int do_register(int sockfd)
     return ret;
 }
 
+void do_quit(int sockfd)
+{
+    client_exec_quit(sockfd);
+}
 int main(int argc, const char *argv[])
 {
     if (argc < 3){
@@ -91,6 +95,8 @@ int main(int argc, const char *argv[])
         case 3:
             break;
         case 4:
+            //未发信号给服务器，服务器进程未推迟
+            do_quit(sockfd);
             goto exit;
             break;
         default:

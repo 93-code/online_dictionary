@@ -26,6 +26,7 @@ int sum_db(sqlite3 *db)
     char *errmsg;
     char **resultp;
 
+    //计算人的个数，由于没有人的ID为-1
     sprintf(sql, "select * from users where %s!=-1;", "id");
     ret = sqlite3_get_table(db, sql, &resultp, &sum, NULL, &errmsg);
     if (ret != SQLITE_OK){
@@ -35,6 +36,7 @@ int sum_db(sqlite3 *db)
 #ifdef __DEBUG__
     printf("sum : %d\n", sum);
 #endif
+    sqlite3_free_table(resultp);
     ret = sum;
 exit:
     return ret;
@@ -87,7 +89,7 @@ int insert_user_db(sqlite3 *db, const char *name, const char *passwd)
         exit(EXIT_FAILURE);
     }
 exit:
-    return 0;
+    return ret;
 }
 
 #ifdef __DEBUG2__
