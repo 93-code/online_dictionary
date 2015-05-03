@@ -1,6 +1,6 @@
 # A simple online_dictionary
 
-## protocol:
+## Protocol:
 
 ```bash
 /*
@@ -140,7 +140,7 @@
  *    4.6 心跳
  */
 ```
-## Loadword
+## Loadwords
 ```bash 
  /*
   * 将单词表导入dict.db 数据库
