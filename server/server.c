@@ -279,7 +279,7 @@ int recv_proc(int sockfd, sqlite3 *db)
 			break;
 	}
 	
-	// 发送数据
+	// 发送返回给客户端的数据
 #ifdef	__DEBUG__
 	packet[ret] = '\0';
 	printf("----------------------------------------\n");
@@ -346,7 +346,7 @@ int do_login(char *packet, sqlite3 *db)
 	printf("\n");
 #endif
 
-	// 插入用户
+	// 查找用户:并通过参数传回passwd
 	ret = sqlite_find_user(db, user_name, tmp);
 	if (ret > 0){
 		// 用户存在

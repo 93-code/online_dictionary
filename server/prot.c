@@ -321,7 +321,7 @@ int packet_pack_login_resp(char *packet, int result)
 	
 	len = packet_pack_head(packet, len, FUNC_LOGIN);
 	
-	// 结果
+	// 结果打包到返回包
 	itoa_len(packet + len, result, LEN_RESULT);
 	len += LEN_RESULT;
 	

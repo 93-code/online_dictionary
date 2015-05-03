@@ -1,0 +1,62 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+FUNC_END	prot.h	/^	FUNC_END,$/;"	e	enum:__anon1
+FUNC_EXIT	prot.h	/^	FUNC_EXIT,$/;"	e	enum:__anon1
+FUNC_HEART	prot.h	/^	FUNC_HEART,$/;"	e	enum:__anon1
+FUNC_INVALID	prot.h	/^	FUNC_INVALID$/;"	e	enum:__anon1
+FUNC_LOGIN	prot.h	/^	FUNC_LOGIN,$/;"	e	enum:__anon1
+FUNC_REG	prot.h	/^	FUNC_REG,$/;"	e	enum:__anon1
+FUNC_START	prot.h	/^	FUNC_START = 0,$/;"	e	enum:__anon1
+FUNC_WORD	prot.h	/^	FUNC_WORD,$/;"	e	enum:__anon1
+LEN_PACKET_FUNC	prot.h	5;"	d
+LEN_PACKET_HEAD	prot.h	6;"	d
+LEN_PACKET_LEN	prot.h	4;"	d
+LEN_PASSWORD	prot.h	9;"	d
+LEN_RESULT	prot.h	10;"	d
+LEN_USER_NAME	prot.h	8;"	d
+RET_ERR_DATABASE	prot.h	15;"	d
+RET_ERR_USER	prot.h	16;"	d
+RET_ERR_USER_EXIST	prot.h	14;"	d
+RET_ERR_WORD	prot.h	17;"	d
+RET_SUCCESS	prot.h	13;"	d
+__PROT_H__	prot.h	2;"	d
+atoi_len	prot.c	/^int atoi_len(const char *buf, int len)$/;"	f
+display_menu	client.c	/^void display_menu(void)$/;"	f
+do_exit	client.c	/^int do_exit(int sockfd)$/;"	f
+do_heart	client.c	/^int do_heart(int sockfd)$/;"	f
+do_login	client.c	/^int do_login(int sockfd)$/;"	f
+do_register	client.c	/^int do_register(int sockfd)$/;"	f
+do_word	client.c	/^int do_word(int sockfd)$/;"	f
+itoa_len	prot.c	/^void itoa_len(char *buf, int val, int len)$/;"	f
+login_input	client.c	/^void login_input(char *name, char *password)$/;"	f
+main	client.c	/^int main(int argc, const char *argv[])$/;"	f
+packet_disp_err	prot.c	/^void packet_disp_err(int err)$/;"	f
+packet_pack_exit_req	prot.c	/^int packet_pack_exit_req(char *packet)$/;"	f
+packet_pack_exit_resp	prot.c	/^int packet_pack_exit_resp(char *packet, int result)$/;"	f
+packet_pack_head	prot.c	/^int packet_pack_head(char *packet, int content_len, int func)$/;"	f
+packet_pack_login_req	prot.c	/^int packet_pack_login_req(char *packet, const char *name, const char *password)$/;"	f
+packet_pack_login_resp	prot.c	/^int packet_pack_login_resp(char *packet, int result)$/;"	f
+packet_pack_reg_req	prot.c	/^int packet_pack_reg_req(char *packet, const char *name, const char *password)$/;"	f
+packet_pack_reg_resp	prot.c	/^int packet_pack_reg_resp(char *packet, int result)$/;"	f
+packet_pack_word_req	prot.c	/^int packet_pack_word_req(char *packet, const char *word)$/;"	f
+packet_pack_word_resp	prot.c	/^int packet_pack_word_resp(char *packet, int result, const char *explain)$/;"	f
+packet_unpack_exit_req	prot.c	/^void packet_unpack_exit_req(const char *packet)$/;"	f
+packet_unpack_exit_resp	prot.c	/^int packet_unpack_exit_resp(const char *packet)$/;"	f
+packet_unpack_head	prot.c	/^int packet_unpack_head(const char *packet, int *func)$/;"	f
+packet_unpack_login_req	prot.c	/^void packet_unpack_login_req(const char *packet, char *name, char *password)$/;"	f
+packet_unpack_login_resp	prot.c	/^int packet_unpack_login_resp(const char *packet)$/;"	f
+packet_unpack_reg_req	prot.c	/^void packet_unpack_reg_req(const char *packet, char *name, char *password)$/;"	f
+packet_unpack_reg_resp	prot.c	/^int packet_unpack_reg_resp(const char *packet)$/;"	f
+packet_unpack_word_req	prot.c	/^void packet_unpack_word_req(const char *packet, char *word)$/;"	f
+packet_unpack_word_resp	prot.c	/^int packet_unpack_word_resp(const char *packet, char *explain)$/;"	f
+recv_fix_len	client.c	/^int recv_fix_len(int sockfd, char *buf, int len)$/;"	f
+recv_packet	client.c	/^int recv_packet(int sockfd, char *packet)$/;"	f
+register_input	client.c	/^void register_input(char *name, char *password)$/;"	f
+send_fix_len	client.c	/^int send_fix_len(int sockfd, char *buf, int len)$/;"	f
+sig_timer	client.c	/^void sig_timer(int signo)$/;"	f
+sockfd	client.c	/^int sockfd;$/;"	v
+word_input	client.c	/^void word_input(char *word, int maxlen)$/;"	f

@@ -65,7 +65,7 @@ int main(int argc, const char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	
-	// 绑定定时信号
+	// 绑定定时信号:收到SIGALRM信号则执行sig_timer
 	if (signal(SIGALRM, sig_timer) == SIG_ERR){
 		perror("Fail to signal!");
 		exit(EXIT_FAILURE);
@@ -210,6 +210,7 @@ void register_input(char *name, char *password)
 {
 	do {
 		printf("user: ");
+        //-1 : 保留'\0'的位置; fgets : xxxx\n\0; 
 		fgets(name, LEN_USER_NAME - 1, stdin);
 		name[strlen(name) - 1] = '\0';
 		
@@ -276,7 +277,7 @@ int recv_packet(int sockfd, char *packet)
 			goto exit;
 		}
 		
-		// 解析包头
+		// 解析包头:取得功能号和内容长度
 		len = packet_unpack_head(packet, &func);
 		if (FUNC_INVALID == func){
 			// 接收到错误包, 清空接收缓冲
@@ -310,7 +311,7 @@ int do_register(int sockfd)
 	
 	register_input(name, password);
 	
-	// 发送请求
+	// 发送请求:打包
 	ret = packet_pack_reg_req(packet, name, password);
 	
 #ifdef	__DEBUG__
@@ -320,6 +321,7 @@ int do_register(int sockfd)
 	printf("----------------------------------------\n");
 	printf("\n");
 #endif
+	// 发送请求
 	ret = send_fix_len(sockfd, packet, ret);
 	if (-1 == ret){
 		goto exit;
@@ -338,6 +340,7 @@ int do_register(int sockfd)
 	printf("\n");
 #endif
 
+    //解包返回包，分析是否注册成功
 	ret = packet_unpack_reg_resp(packet);
 	if (RET_SUCCESS == ret){
 		printf("Register OK!\n");
@@ -359,6 +362,7 @@ int do_login(int sockfd)
 	char password[LEN_PASSWORD];
 	char packet[1024];
 	
+    //登录输入
 	login_input(name, password);
 	
 	// 请求包打包
@@ -462,9 +466,7 @@ exit:
 int do_exit(int sockfd)
 {
 	int ret = 0;
-	char word[512];
 	char packet[1024];
-	char explain[1024];
 	
 	// 请求打包
 	ret = packet_pack_exit_req(packet);
